@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crop Recommendation | KisanBuddy</title>
+  <script src="js/auth_check.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style1.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- Navbar -->
+  <header class="header">
+    <div class="logo">
+      <h1>KisanBuddy</h1>
+    </div>
+
+    <nav class="navbar">
+      <a href="/frontend/landing.html#home">Home</a>
+      <a href="/frontend/landing.html#features">Features</a>
+      <a href="/frontend/landing.html#about">About</a>
+      <a href="/frontend/landing.html#footer">Contact</a>
+      <a href="explore/index.html">EXPLORE NOW</a>
+      <div class="language-selector">
+        <select id="languageDropdown" onchange="handleLanguageChange()">
+          <option value="en">🌐 English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="mr">मराठी</option>
+          <option value="ta">தமிழ்</option>
+          <option value="te">తెలుగు</option>
+          <option value="kn">ಕನ್ನಡ</option>
+        </select>
+      </div>
+      <a href="profile.html" class="btn">Profile</a>
+    </nav>
+
+    <div id="google_translate_element" style="display: none;"></div>
+
+    <!-- Mobile menu button -->
+    <div class="menu-toggle">
+      <i class="fas fa-bars" id="menu-btn"></i>
+      <label class="switch">
+        <input type="checkbox" id="dark-toggle" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </header>
+
+  <!-- Crop Prediction Form -->
+  <section class="features" style="padding-top: 100px;">
+    <div class="heading">
+      <h1>Crop Recommendation System</h1>
+      <p>Enter soil and weather parameters to get the most suitable crop recommendation.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="feature-card" style="max-width: 600px; margin: auto;">
+        <form id="cropForm">
+          <input type="number" step="any" id="N" placeholder="Nitrogen (N)" value="90" required><br>
+          <input type="number" step="any" id="P" placeholder="Phosphorus (P)" value="40" required><br>
+          <input type="number" step="any" id="K" placeholder="Potassium (K)" value="40" required><br>
+          <input type="number" step="any" id="temperature" placeholder="Temperature (°C)" value="25.5" required><br>
+          <input type="number" step="any" id="humidity" placeholder="Humidity (%)" value="80" required><br>
+          <input type="number" step="any" id="ph" placeholder="pH Level" value="6.5" required><br>
+          <input type="number" step="any" id="rainfall" placeholder="Rainfall (mm)" value="200" required><br>
+          <button type="submit" class="all-btn" style="margin-top: 1rem;">Predict</button>
+        </form>
+        <p id="result" style="margin-top: 15px; font-weight: bold;"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- JavaScript -->
+  <script>
+    document.getElementById("menu-btn").addEventListener("click", () => {
+      document.querySelector(".navbar").classList.toggle("active");
+    });
+
+    const darkToggle = document.getElementById("dark-toggle");
+    const body = document.body;
+    darkToggle.addEventListener("change", () => {
+      body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", body.classList.contains("dark-mode"));
+    });
+
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "true") {
+        body.classList.add("dark-mode");
+        darkToggle.checked = true;
+      }
+    };
+
+    document.getElementById('cropForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const data = {
+        N: parseFloat(document.getElementById('N').value),
+        P: parseFloat(document.getElementById('P').value),
+        K: parseFloat(document.getElementById('K').value),
+        temperature: parseFloat(document.getElementById('temperature').value),
+        humidity: parseFloat(document.getElementById('humidity').value),
+        ph: parseFloat(document.getElementById('ph').value),
+        rainfall: parseFloat(document.getElementById('rainfall').value),
+      };
+
+      try {
+        const res = await fetch('http://127.0.0.1:8000/crop/predict_crop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+        const resultEl = document.getElementById('result');
+
+        if (res.ok && result.prediction) {
+          resultEl.innerHTML = `
+            🌾 <strong>Recommended Crop:</strong> ${result.prediction}<br/>
+            🟢 <strong>Reason:</strong> ${result.reason}<br/>
+            📅 <strong>Sowing Period:</strong> ${result.sowing_period}<br/>
+            💡 <strong>Tip:</strong> ${result.tip}
+          `;
+          resultEl.style.color = "#228B22";
+        } else {
+          resultEl.innerHTML = `❌ Error: ${result.detail || 'Unknown error'}`;
+          resultEl.style.color = "red";
+        }
+      } catch (error) {
+        console.error("Prediction failed:", error);
+        document.getElementById("result").textContent = "❌ Error predicting crop.";
+        document.getElementById("result").style.color = "red";
+      }
+    });
+  </script>
+
+  <script src="js/translate.js"></script>
+</body>
+</html>

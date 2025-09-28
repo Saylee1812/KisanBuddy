@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Soil Health Analysis | KisanBuddy</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style1.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <script src="js/auth_check.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f9f6;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      color: #2b7a0b;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.7rem 1.5rem;
+      background-color: #2b7a0b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 1rem;
+      font-weight: bold;
+      text-align: center;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      white-space: pre-wrap;
+      color: #2b7a0b;
+    }
+    #recommendationBox {
+      color: #444;
+      white-space: pre-line;
+      background-color: #fdfdfd;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ddd;
+      max-width: 600px;
+      margin: 1rem auto;
+      font-weight: normal;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <h1>KisanBuddy</h1>
+    </div>
+
+    <nav class="navbar">
+      <a href="/frontend/landing.html#home">Home</a>
+      <a href="/frontend/landing.html#features">Features</a>
+      <a href="/frontend/landing.html#about">About</a>
+      <a href="/frontend/landing.html#footer">Contact</a>
+      <a href="explore/index.html">EXPLORE NOW</a>
+      <div class="language-selector">
+        <select id="languageDropdown" onchange="handleLanguageChange()">
+          <option value="en">🌐 English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="mr">मराठी</option>
+          <option value="ta">தமிழ்</option>
+          <option value="te">తెలుగు</option>
+          <option value="kn">ಕನ್ನಡ</option>
+        </select>
+      </div>
+      <a href="profile.html" class="btn">Profile</a>
+    </nav>
+
+    <div id="google_translate_element" style="display: none;"></div>
+
+    <!-- Mobile menu button -->
+    <div class="menu-toggle">
+      <i class="fas fa-bars" id="menu-btn"></i>
+      <label class="switch">
+        <input type="checkbox" id="dark-toggle" />
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </header>
+  
+  <h1>🧪 Soil Health Analysis</h1>
+
+  <form id="soilForm">
+    <label for="N">Nitrogen (N)</label>
+    <input type="number" id="N" name="N" required value="45" />
+
+    <label for="P">Phosphorus (P)</label>
+    <input type="number" id="P" name="P" required value="25" />
+
+    <label for="K">Potassium (K)</label>
+    <input type="number" id="K" name="K" required value="50" />
+
+    <label for="pH">pH</label>
+    <input type="number" id="pH" name="pH" step="0.01" required value="6.5" />
+
+    <label for="EC">Electrical Conductivity (EC)</label>
+    <input type="number" id="EC" name="EC" step="0.01" required value="0.45" />
+
+    <label for="OC">Organic Carbon (OC)</label>
+    <input type="number" id="OC" name="OC" step="0.01" required value="0.8" />
+
+    <label for="S">Sulfur (S)</label>
+    <input type="number" id="S" name="S" step="0.01" required value="10" />
+
+    <label for="Zn">Zinc (Zn)</label>
+    <input type="number" id="Zn" name="Zn" step="0.01" required value="1.5" />
+
+    <label for="Fe">Iron (Fe)</label>
+    <input type="number" id="Fe" name="Fe" step="0.01" required value="4.2" />
+
+    <label for="Cu">Copper (Cu)</label>
+    <input type="number" id="Cu" name="Cu" step="0.01" required value="0.6" />
+
+    <label for="Mn">Manganese (Mn)</label>
+    <input type="number" id="Mn" name="Mn" step="0.01" required value="1.2" />
+
+    <label for="B">Boron (B)</label>
+    <input type="number" id="B" name="B" step="0.01" required value="0.4" />
+
+    <button type="submit">Analyze</button>
+  </form>
+
+  <div class="result" id="resultBox"></div>
+  <div class="result" id="recommendationBox"></div>
+
+  <script>
+    const form = document.getElementById('soilForm');
+    const resultBox = document.getElementById('resultBox');
+    const recommendationBox = document.getElementById('recommendationBox');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const userId = localStorage.getItem("user_id");
+      if (!userId) {
+        resultBox.textContent = "❌ User not logged in!";
+        recommendationBox.textContent = "";
+        return;
+      }
+
+      const formData = new FormData(form);
+      const payload = {};
+      formData.forEach((value, key) => {
+        payload[key] = parseFloat(value);
+      });
+      payload["user_id"] = userId;
+
+      try {
+        const res = await fetch('http://127.0.0.1:8000/soil/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.detail || "Server error");
+        }
+
+        const data = await res.json();
+        console.log("Response data:", data);
+
+        const fertility = data.fertility_result || data.fertility_class || "Unknown";
+        resultBox.textContent = `🌱 Soil Fertility Class: ${fertility}`;
+
+        if (data.recommendations) {
+          recommendationBox.innerHTML = `🧪 Recommendations to Improve:<br>${data.recommendations.replace(/\n/g, "<br>")}`;
+        } else {
+          recommendationBox.textContent = '';
+        }
+
+        // Fetch stored recommendations from user profile
+        // Fetch stored recommendations from user profile
+const storedRes = await fetch(`http://127.0.0.1:8000/profile/user/${userId}/recommendations`);
+if (storedRes.ok) {
+  const storedData = await storedRes.json();
+  if (storedData.recommendations) {
+    // Format paragraphs for better readability
+    const formattedSuggestions = storedData.recommendations
+      .split(/\n\s*\n/) // split on double newlines
+      .map(paragraph => `<p>${paragraph.trim()}</p>`)
+      .join('');
+      
+    recommendationBox.innerHTML += `<br><strong>📦 Stored Suggestion:</strong><ol style="padding-left: 20px; margin-top: 0.5rem; line-height: 1.7;">${formattedSuggestions}`;
+  }
+}
+
+
+      } catch (error) {
+        resultBox.textContent = `❌ Error: ${error.message}`;
+        recommendationBox.textContent = "";
+        console.error("Error fetching soil analysis:", error);
+      }
+    });
+
+    
+    const darkToggle = document.getElementById("dark-toggle");
+    const body = document.body;
+    darkToggle.addEventListener("change", () => {
+      body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", body.classList.contains("dark-mode"));
+    });
+
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "true") {
+        body.classList.add("dark-mode");
+        darkToggle.checked = true;
+      }
+    };
+  </script>
+
+  <script src="js/translate.js"></script>
+  <div id="google_translate_element" style="display: none;"></div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+.language-selector {
+    margin-left: 1rem;
+    display: inline-block;
+  }
+  
+  .language-selector select {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 2px solid #0077ff;
+    border-radius: 5px;
+    background-color: white;
+    color: #0077ff;
+    font-weight: bold;
+  }
+  body > .skiptranslate {
+        display: none !important;
+      }

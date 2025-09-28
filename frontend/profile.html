@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>User Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background-color: #f5fff5;
+      color: #333;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: linear-gradient(180deg, #4caf50, #2e7d32);
+      color: white;
+      padding: 20px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    }
+
+    .sidebar h2 {
+      margin-bottom: 30px;
+      font-size: 24px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin: 12px 0;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+      color: #d2ffd2;
+    }
+
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .avatar {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #4caf50;
+    }
+
+    .upload-avatar {
+      margin-top: 10px;
+    }
+
+    .profile-info h2 {
+      font-size: 26px;
+      color: #2e7d32;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+
+    .card h3 {
+      margin-bottom: 15px;
+      color: #2e7d32;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+    }
+
+    .form-section h4 {
+      cursor: pointer;
+      background: #4caf50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .form-grid input,
+    .form-grid select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #2e7d32;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1b5e20;
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>KisanBuddy</h2>
+    <a href="#">Profile</a>
+    <a href="#">Settings</a>
+    <a href="#">Logout</a>
+  </div>
+
+  <div class="main">
+    <div class="profile-header">
+      <div>
+        <img class="avatar" id="avatar" src="https://i.imgur.com/3xQT1VG.png" alt="Profile Picture" />
+        <input type="file" id="avatar-upload" class="upload-avatar" accept="image/*" />
+      </div>
+      <div class="profile-info">
+        <h2 id="username">User Name</h2>
+        <p id="email">user@example.com</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Basic Info</h3>
+      <p><strong>Phone:</strong> <span id="phone"></span></p>
+      <p><strong>Location:</strong> <span id="location"></span></p>
+      <p><strong>Farming Type:</strong> <span id="farming_type"></span></p>
+      <p><strong>Crops:</strong> <span id="crops"></span></p>
+      <p><strong>Land Size:</strong> <span id="land_size"></span></p>
+      <p><strong>Soil Type:</strong> <span id="soil_type"></span></p>
+      <p><strong>Irrigation Method:</strong> <span id="irrigation_method"></span></p>
+      <p><strong>Preferred Language:</strong> <span id="preferred_language"></span></p>
+      <p><strong>Experience:</strong> <span id="experience"></span></p>
+      <p><strong>Weather Alerts:</strong> <span id="weather_alerts"></span></p>
+    </div>
+
+    <div class="card">
+      <h3>Update Profile</h3>
+      <div class="form-section">
+        <h4 onclick="toggleForm()">Edit Fields ⯆</h4>
+        <form id="profile-form">
+          <div class="form-grid" id="form-grid">
+            <input id="username-input" placeholder="Username" />
+            <input id="email-input" placeholder="Email" />
+            <input id="phone-input" placeholder="Phone" />
+            <input id="location-input" placeholder="Location" />
+
+            <select id="farming_type-input">
+              <option value="">Select Farming Type</option>
+              <option value="Organic">Organic</option>
+              <option value="Conventional">Conventional</option>
+              <option value="Hydroponic">Hydroponic</option>
+            </select>
+
+            <input id="crops-input" placeholder="Crops (comma separated)" />
+            <input id="land_size-input" placeholder="Land Size in acres" />
+
+            <select id="soil_type-input">
+              <option value="">Select Soil Type</option>
+              <option value="Clay">Clay</option>
+              <option value="Sandy">Sandy</option>
+              <option value="Loamy">Loamy</option>
+              <option value="Silty">Silty</option>
+              <option value="Peaty">Peaty</option>
+            </select>
+
+            <select id="irrigation_method-input">
+              <option value="">Select Irrigation Method</option>
+              <option value="Drip">Drip</option>
+              <option value="Sprinkler">Sprinkler</option>
+              <option value="Surface">Surface</option>
+            </select>
+
+            <select id="preferred_language-input">
+              <option value="">Select Language</option>
+              <option value="English">English</option>
+              <option value="Hindi">Hindi</option>
+              <option value="Marathi">Marathi</option>
+              <option value="Tamil">Tamil</option>
+              <option value="Telugu">Telugu</option>
+              <option value="Kannada">Kannada</option>
+            </select>
+
+            <select id="experience-input">
+              <option value="">Experience Level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+
+            <select id="weather_alerts-input">
+              <option value="true">Weather Alerts: ON</option>
+              <option value="false">Weather Alerts: OFF</option>
+            </select>
+          </div>
+          <button type="submit">Update Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const userId = localStorage.getItem("user_id");
+  const token = localStorage.getItem("token");
+
+  function toggleForm() {
+    const grid = document.getElementById("form-grid");
+    grid.style.display = grid.style.display === "grid" ? "none" : "grid";
+  }
+
+  async function loadProfile() {
+    const res = await fetch(`http://localhost:8000/profile/user/${userId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const fields = ["username", "email", "phone", "location", "farming_type", "crops", "land_size", "soil_type", "irrigation_method", "preferred_language", "experience", "weather_alerts"];
+    fields.forEach(f => {
+      document.getElementById(f).innerText = Array.isArray(data[f]) ? data[f].join(", ") : data[f];
+      const input = document.getElementById(f + "-input");
+      if (input) input.value = data[f] || "";
+    });
+    document.getElementById("username").innerText = data["username"];
+    document.getElementById("email").innerText = data["email"];
+    if (data["avatar_url"]) {
+      document.getElementById("avatar").src = data["avatar_url"];
+    }
+  }
+
+  document.getElementById("profile-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {
+      username: document.getElementById("username-input").value,
+      email: document.getElementById("email-input").value,
+      phone: document.getElementById("phone-input").value,
+      location: document.getElementById("location-input").value,
+      farming_type: document.getElementById("farming_type-input").value,
+      crops: document.getElementById("crops-input").value.split(",").map(c => c.trim()),
+      land_size: document.getElementById("land_size-input").value,
+      soil_type: document.getElementById("soil_type-input").value,
+      irrigation_method: document.getElementById("irrigation_method-input").value,
+      preferred_language: document.getElementById("preferred_language-input").value,
+      experience: document.getElementById("experience-input").value,
+      weather_alerts: document.getElementById("weather_alerts-input").value === "true"
+    };
+    const res = await fetch(`http://localhost:8000/profile/user/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      alert("Profile updated!");
+      loadProfile();
+    } else {
+      alert("Update failed.");
+    }
+  });
+
+  document.getElementById("avatar-upload").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        document.getElementById("avatar").src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      // TODO: Upload to backend with FormData if needed
+      // Example:
+      // const formData = new FormData();
+      // formData.append("avatar", file);
+      // fetch('/upload-avatar', { method: 'POST', body: formData });
+    }
+  });
+
+  loadProfile();
+</script>
+</body>
+</html>

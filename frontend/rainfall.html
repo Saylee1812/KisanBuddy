@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rainfall Prediction | KisanBuddy</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style1.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+/>
+  <script src="js/auth_check.js"></script>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <header class="header">
+    <div class="logo">
+      <h1>KisanBuddy</h1>
+    </div>
+
+    <nav class="navbar">
+      <a href="/frontend/landing.html#home">Home</a>
+      <a href="/frontend/landing.html#features">Features</a>
+      <a href="/frontend/landing.html#about">About</a>
+      <a href="/frontend/landing.html#footer">Contact</a>
+      <a href="explore/index.html" >EXPLORE NOW</a>
+      <!-- Language Dropdown for Google Translate -->
+      <div class="language-selector">
+        <select id="languageDropdown" onchange="handleLanguageChange()">
+          <option value="en">🌐 English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="mr">मराठी</option>
+          <option value="ta">தமிழ்</option>
+          <option value="te">తెలుగు</option>
+          <option value="kn">ಕನ್ನಡ</option>
+        </select>
+      </div>
+      <a href="profile.html" class="btn">Profile</a>
+    </nav>
+    
+   <div id="google_translate_element" style="display: none;"></div>
+
+      <!-- Mobile menu button -->
+      <div class="menu-toggle">
+        <i class="fas fa-bars" id="menu-btn"></i>
+        <label class="switch">
+          <input type="checkbox" id="dark-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+  </header>
+
+  <!-- Main Section -->
+  <section style="padding: 100px 10% 60px;">
+    <div class="content" style="width: 100%; text-align: center;">
+      <h1>Smart Rainfall Prediction</h1>
+      <p>Enter your city or use live location to get rainfall prediction and irrigation advice.</p>
+    </div>
+    
+    <div style="max-width: 600px; margin: 30px auto; text-align: center;">
+      <label for="city" style="font-weight: 600; display: block ;margin-bottom: 8px;">Enter City Name</label>
+      <input type="text" id="city" placeholder="e.g., Bengaluru" background=#b4d9f7 style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" />
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 25px;">
+        <button class="home-btn" onclick="predictRainByCity()" style="display: flex; align-items: center; gap: 8px;">
+          🏙️ Predict by City
+        </button>
+        <button class="home-btn" onclick="predictRainByLocation()" style="display: flex; align-items: center; gap: 8px;">
+          📍 Use Live Location
+        </button>
+      </div>
+      
+
+      <div id="result" class="result" style="display: none; margin-top: 25px; background: #b5d6f0; padding: 15px; border-radius: 10px;color: #333; border-left: 4px solid #1f4e46;">
+        <h3>Prediction Result:</h3>
+        <p id="rain"></p>
+        <p id="irrigation"></p>
+        <p><strong>Weather:</strong> <span id="weather"></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Script -->
+  <script>
+    // City input prediction
+    async function predictRainByCity() {
+      const city = document.getElementById('city').value;
+      if (!city) {
+        alert("Please enter a city name.");
+        return;
+      }
+      const url = `http://localhost:8000/rainfall/predict_rainfall?city=${encodeURIComponent(city)}`;
+      fetchRain(url);
+    }
+
+    // Location-based prediction
+    async function predictRainByLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const url = `http://localhost:8000/rainfall/predict_rainfall?lat=${lat}&lon=${lon}`;
+          fetchRain(url);
+        }, (error) => {
+          alert("Error getting location: " + error.message);
+        });
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+
+    // Fetch data from backend
+    async function fetchRain(url) {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById('rain').innerHTML = `<strong>Will it rain tomorrow?:</strong> ${data.will_rain_tomorrow ? "🌧️ Yes" : "☀️ No"}`;
+          document.getElementById('irrigation').innerHTML = `<strong>Irrigation Advice:</strong> ${data.irrigation_advice}`;
+          document.getElementById('weather').innerText = 
+            `Location: ${data.location}, Temperature: ${data.weather.temperature}°C, Humidity: ${data.weather.humidity}%, Pressure: ${data.weather.pressure} mb, Windspeed: ${data.weather.windspeed} km/h, Rainfall Today: ${data.weather.rainfall_today} mm`;
+
+          document.getElementById('result').style.display = 'block';
+        } else {
+          alert(data.error || "An error occurred.");
+          document.getElementById('result').style.display = 'none';
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error fetching data.");
+      }
+    }
+
+    // Menu & dark mode toggle
+    document.getElementById("menu-btn").addEventListener("click", () => {
+  document.querySelector(".navbar").classList.toggle("active");
+});
+
+
+    const darkToggle = document.getElementById("dark-toggle");
+    const body = document.body;
+
+    darkToggle.addEventListener("change", () => {
+      body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", body.classList.contains("dark-mode"));
+    });
+
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "true") {
+        body.classList.add("dark-mode");
+        darkToggle.checked = true;
+      }
+    };
+  </script>
+  <script src="js/translate.js"></script>
+</body>
+</html>

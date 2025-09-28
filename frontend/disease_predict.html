@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plant Disease Detection</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style1.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+/>
+<script src="js/disease_info.js" defer></script>
+
+  <script src="js/auth_check.js"></script>
+
+
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <header class="header">
+    <div class="logo">
+      <h1>KisanBuddy</h1>
+    </div>
+
+    <nav class="navbar">
+      <a href="/frontend/landing.html#home">Home</a>
+      <a href="/frontend/landing.html#features">Features</a>
+      <a href="/frontend/landing.html#about">About</a>
+      <a href="/frontend/landing.html#footer">Contact</a>
+      <a href="explore/index.html" >EXPLORE NOW</a>
+      <!-- Language Dropdown for Google Translate -->
+      <div class="language-selector">
+        <select id="languageDropdown" onchange="handleLanguageChange()">
+          <option value="en">🌐 English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="mr">मराठी</option>
+          <option value="ta">தமிழ்</option>
+          <option value="te">తెలుగు</option>
+          <option value="kn">ಕನ್ನಡ</option>
+        </select>
+      </div>
+      <a href="profile.html" class="btn">Profile</a>
+    </nav>
+    
+   <div id="google_translate_element" style="display: none;"></div>
+
+      <!-- Mobile menu button -->
+      <div class="menu-toggle">
+        <i class="fas fa-bars" id="menu-btn"></i>
+        <label class="switch">
+          <input type="checkbox" id="dark-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+  </header>
+
+  <!-- Main Section -->
+  <section  style="padding: 100px 10% 60px;">
+    <div class="content" style="width: 100%; text-align: center;">
+      <h1>Smart Plant Disease Detection</h1>
+      <p>Upload a crop image and let KisanBuddy analyze and identify potential diseases.</p>
+    </div>
+    <div style="text-align: center; margin-top: 30px;">
+      <img src="images/Diseases.png" alt="Disease Reference" width="350" height="300" class="rounded-corner-image">
+      <br><br>
+      <label for="fileInput" class="all-btn" style="cursor: pointer; display: inline-block;">
+        📷 Choose Image
+      </label>
+      <input type="file" id="fileInput" accept="image/*" required style="display: none;" />
+      <span id="file-name" style="display: block; margin-top: 10px; font-weight: 500;"></span>
+
+      
+      <button onclick="predict()" class="home-btn">Predict</button>
+      <div id="preview" style="margin-top: 20px;"></div>
+      <div id="result" class="result" style="font-size: 1.5rem; color: green; margin-top: 20px;"></div>
+    </div>
+  </section>
+
+  <!-- Script -->
+  <script>
+    document.getElementById("fileInput").addEventListener("change", function () {
+      const fileName = this.files[0] ? this.files[0].name : "No file chosen";
+      document.getElementById("file-name").innerText = `Selected: ${fileName}`;
+    });
+  
+    async function predict() {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please choose a file first.");
+        return;
+      }
+  
+      // Preview
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById("preview").innerHTML = `<h3>Uploaded Image:</h3><img src="${e.target.result}" alt="Uploaded Image" class="rounded-corner-image" style="max-width:300px;">`;
+      };
+      reader.readAsDataURL(file);
+  
+      // Send image to backend
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      const res = await fetch("http://localhost:8000/plant-disease/predict", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const data = await res.json();
+      const prediction = data.result;
+      document.getElementById("result").innerHTML = `<strong>Prediction:</strong> ${prediction}`;
+
+// Fetch detailed info from MongoDB via backend
+const infoRes = await fetch(`http://localhost:8000/plant-disease/info/${prediction}`);
+if (infoRes.ok) {
+  const info = await infoRes.json();
+  const sourcesHTML = info.sources.map(url => `<li><a href="${url}" target="_blank">${url}</a></li>`).join("");
+
+document.getElementById("result").innerHTML += `
+  <div class="disease-info-card">
+    <h2>${info.title}</h2>
+    <p><strong>Description:</strong> ${info.description}</p>
+    <h4>Sources:</h4>
+    <ul>${sourcesHTML}</ul>
+    <p><strong>Symptoms:</strong> ${info.symptoms}</p>
+    <p><strong>Management:</strong> ${info.treatment}</p>
+    
+  </div>
+`;
+
+} else {
+  document.getElementById("result").innerHTML += `
+    <div class="disease-info-card">
+      <p style="color: red;">No additional information available for this disease.</p>
+    </div>
+  `;
+}
+
+
+    }
+  
+    // Mobile Menu Toggle
+    document.getElementById("menu-btn").addEventListener("click", () => {
+      document.querySelector(".navbar").classList.toggle("active");
+    });
+  
+    // Dark Mode
+    const darkToggle = document.getElementById("dark-toggle");
+    const body = document.body;
+  
+    darkToggle.addEventListener("change", () => {
+      body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", body.classList.contains("dark-mode"));
+    });
+  
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "true") {
+        body.classList.add("dark-mode");
+        darkToggle.checked = true;
+      }
+    };
+  </script>
+  
+  <script src="js/translate.js"></script>
+</body>
+</html>
