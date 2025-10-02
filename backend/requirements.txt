@@ -1,0 +1,22 @@
+fastapi
+uvicorn
+pymongo
+python-dotenv
+passlib==1.7.4
+bcrypt==4.0.1
+python-jose[cryptography]
+python-multipart
+scikit-learn
+numpy
+joblib
+jinja2
+requests
+pandas
+tensorflow
+pillow
+google-generativeai
+markdown
+
+
+# run seed_insert.py in backend folder to update mongodb
+# run insert_disease.py in backend folder to update mongodb--but check this file each id matches properly for all --take apple cedar as exaple
